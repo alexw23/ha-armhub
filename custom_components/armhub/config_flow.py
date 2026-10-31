@@ -343,4 +343,4 @@ class ArmHubConfigFlow(ConfigFlow, domain=DOMAIN):
                 "refresh_token": bootstrap_token.get("refresh_token"),
                 "expires_on":    bootstrap_token.get("expires_on"),
             }
-        return self.async_create_entry(title=f"ARM-Hub ({self._hub_url})", data=data)
+        return self.async_create_entry(title="ARM-Hub (UK Heat Network)", data=data)
