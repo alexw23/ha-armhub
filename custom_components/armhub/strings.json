@@ -1,0 +1,58 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "UK Heat Network (ARM-Hub)",
+        "description": "Enter your ARM-Hub portal credentials. Currently tested with ARM Hub (spoton.arm-hub.com). Other providers on arm-hub.com may work.\n\nThe auth addon must be installed and running before you continue.\n\n**Finding your API key:** log in to your heat network's portal in a browser (for example spot-on-energy.arm-hub.com), open the developer tools console, then paste this and press Enter:\n\n```\n{key_snippet}\n```\n\nIt prints a 32-character key, which only appears on your screen. If it says the key wasn't found, open the Network tab, reload the page, select a request to api.armadillo-analytics.com, and copy its `Ocp-Apim-Subscription-Key` header.",
+        "data": {
+          "hub_url": "Hub URL (e.g. spoton.arm-hub.com)",
+          "email": "Email address",
+          "password": "Password",
+          "addon_url": "Auth addon URL",
+          "imap_entity": "IMAP sensor entity ID (optional — for automatic MFA)",
+          "api_key": "API key"
+        }
+      },
+      "login_progress": {
+        "title": "Logging In"
+      },
+      "mfa": {
+        "title": "Verification Required",
+        "description": "A 6-digit code has been sent to the email address registered with your heat network portal. Enter it below.\n\n{imap_note}\n\n**Note:** ARM-Hub requires re-verification approximately every 24 hours. After setup, manage future codes via the **MFA Code** helper entity, or configure IMAP email forwarding for fully automatic handling.",
+        "data": {
+          "mfa_code": "6-digit verification code"
+        }
+      },
+      "reconfigure": {
+        "title": "Reconfigure UK Heat Network (ARM-Hub)",
+        "description": "Update your ARM-Hub credentials or settings. Any MFA will be handled automatically by the integration after saving.\n\n**Finding your API key:** log in to your heat network's portal in a browser (for example spot-on-energy.arm-hub.com), open the developer tools console, then paste this and press Enter:\n\n```\n{key_snippet}\n```\n\nIt prints a 32-character key, which only appears on your screen. If it says the key wasn't found, open the Network tab, reload the page, select a request to api.armadillo-analytics.com, and copy its `Ocp-Apim-Subscription-Key` header.",
+        "data": {
+          "hub_url": "Hub URL (e.g. spoton.arm-hub.com)",
+          "email": "Email address",
+          "password": "Password",
+          "addon_url": "Auth addon URL",
+          "imap_entity": "IMAP sensor entity ID (optional — for automatic MFA)",
+          "api_key": "API key"
+        }
+      }
+    },
+    "progress": {
+      "logging_in": "Logging in to your ARM-Hub account, please wait…"
+    },
+    "error": {
+      "required": "This field is required.",
+      "invalid_url": "Could not parse a valid hostname from the hub URL.",
+      "addon_unreachable": "Cannot reach the auth addon. Make sure the addon is installed and running.",
+      "addon_error": "The auth addon returned an unexpected error.",
+      "invalid_mfa_code": "Code must be exactly 6 digits.",
+      "mfa_submit_failed": "Failed to submit the code. Check the addon is still running and try again.",
+      "mfa_timeout": "Timed out waiting for login confirmation. Try submitting the code again.",
+      "addon_login_failed": "The portal login failed after the code was entered. Check the addon logs for details and try again.",
+      "invalid_api_key": "That doesn't look right: the API key should be 32 letters and numbers."
+    },
+    "abort": {
+      "already_configured": "This account is already configured.",
+      "reconfigure_successful": "Re-configuration was successful."
+    }
+  }
+}
