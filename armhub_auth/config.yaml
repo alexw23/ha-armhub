@@ -1,6 +1,6 @@
 name: "UK Heat Network (ARM-Hub) — Auth Addon"
 description: "Handles Azure AD B2C login and token refresh for the ARM-Hub HA integration."
-version: "2.2.1"
+version: "2.3.0"
 slug: "armhubmeter"
 url: "https://github.com/alexw23/ha-armhub"
 init: false
