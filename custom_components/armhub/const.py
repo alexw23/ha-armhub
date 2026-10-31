@@ -8,8 +8,8 @@ CONF_ADDON_URL   = "addon_url"
 CONF_IMAP_ENTITY = "imap_entity"
 CONF_API_KEY     = "api_key"
 
-DEFAULT_HUB_URL   = "spoton.arm-hub.com"
-DEFAULT_ADDON_URL = "http://local-armhubmeter:8099"
+DEFAULT_HUB_URL   = "spot-on-energy.arm-hub.com"
+DEFAULT_ADDON_URL = "http://60356650-armhubmeter:8099"
 
 POLL_INTERVAL_MINUTES    = 5
 DISCOVERY_INTERVAL_HOURS = 24
