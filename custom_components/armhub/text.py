@@ -40,7 +40,7 @@ class MfaCodeText(CoordinatorEntity[ArmHubCoordinator], TextEntity):
     def device_info(self) -> DeviceInfo | None:
         return DeviceInfo(
             identifiers={(DOMAIN, self.coordinator.config_entry.entry_id)},
-            name=f"ARM-Hub ({self.coordinator.hub_url})",
+            name="ARM-Hub (UK Heat Network)",
             manufacturer="ARM-Hub",
         )
 

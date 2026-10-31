@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- New installs are named "ARM-Hub (UK Heat Network)" rather than after the hub address.
+
 ## [2.3.0] - 2026-10-31
 
 ### Added
