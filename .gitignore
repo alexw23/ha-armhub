@@ -1,0 +1,6 @@
+.env
+.armadillo_tokens.json
+gmail_token.json
+.claude/
+__pycache__/
+*.pyc
