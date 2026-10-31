@@ -90,9 +90,10 @@ jobs:
           sed -i "s/^version:.*/version: \"$VERSION\"/" armhub_auth/config.yaml
           sed -i "s/\"version\": \".*\"/\"version\": \"$VERSION\"/" custom_components/armhub/manifest.json
           sed -i "0,/^## \[Unreleased\].*/s//## [Unreleased]\n\n## [$VERSION] - $DATE/" CHANGELOG.md
-          # Home Assistant doesn't follow symlinks inside add-on folders.
-          cp CHANGELOG.md armhub_auth/CHANGELOG.md
-          cp CHANGELOG.md armhub_auth_dev/CHANGELOG.md
+          # Home Assistant doesn't follow symlinks inside add-on folders. The copies
+          # users see leave out the heading kept in the main one for the next release.
+          sed '/^## \[Unreleased\]$/,+1d' CHANGELOG.md > armhub_auth/CHANGELOG.md
+          sed '/^## \[Unreleased\]$/,+1d' CHANGELOG.md > armhub_auth_dev/CHANGELOG.md
       - name: Open the pull request
         env:
           TAG: ${{ github.event.release.tag_name }}
