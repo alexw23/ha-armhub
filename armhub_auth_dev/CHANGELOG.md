@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [2.3.0] - 2026-10-31
+
 ### Added
 
 - Prebuilt add-on images, so installs and updates no longer build on your machine.
