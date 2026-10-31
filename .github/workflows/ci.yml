@@ -4,6 +4,14 @@ on:
   push:
     branches: [main]
   pull_request:
+    # Version bump PRs only touch these. Skipping them also avoids GitHub holding
+    # a run for approval, because a bot opens those PRs.
+    paths-ignore:
+      - CHANGELOG.md
+      - armhub_auth/CHANGELOG.md
+      - armhub_auth_dev/CHANGELOG.md
+      - armhub_auth/config.yaml
+      - custom_components/armhub/manifest.json
 
 permissions:
   contents: read
