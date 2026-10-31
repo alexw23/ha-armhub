@@ -15,7 +15,7 @@ from homeassistant.config_entries import ConfigFlow, ConfigFlowResult
 from homeassistant.const import CONF_EMAIL, CONF_PASSWORD
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
-from .const import CONF_ADDON_URL, CONF_API_KEY, CONF_HUB_URL, CONF_IMAP_ENTITY, DEFAULT_ADDON_URL, DEFAULT_HUB_URL, DOMAIN
+from .const import CONF_ADDON_URL, CONF_API_KEY, CONF_HUB_URL, DEFAULT_ADDON_URL, DEFAULT_HUB_URL, DOMAIN
 
 _MFA_CODE = "mfa_code"
 
@@ -50,15 +50,6 @@ def _normalise_api_key(raw: str) -> str:
     return key if re.fullmatch(r"[0-9a-f]{32}", key) else ""
 
 
-def _detect_imap_entity(hass) -> str:
-    """Return the first likely IMAP sensor entity_id, or empty string."""
-    for state in hass.states.async_all("sensor"):
-        eid = state.entity_id
-        if re.search(r"imap", eid, re.IGNORECASE):
-            return eid
-    return ""
-
-
 class ArmHubConfigFlow(ConfigFlow, domain=DOMAIN):
     """Handle the config flow."""
 
@@ -70,7 +61,6 @@ class ArmHubConfigFlow(ConfigFlow, domain=DOMAIN):
         self._password: str = ""
         self._addon_url: str = DEFAULT_ADDON_URL
         self._api_key: str = ""
-        self._imap_entity: str | None = None
         self._login_error: str | None = None
         self._token_data: dict | None = None
         self._login_task: asyncio.Task | None = None
@@ -81,7 +71,6 @@ class ArmHubConfigFlow(ConfigFlow, domain=DOMAIN):
         self, user_input: dict | None = None
     ) -> ConfigFlowResult:
         errors: dict[str, str] = {}
-        imap_default = _detect_imap_entity(self.hass)
 
         # Carry forward any error surfaced by the background login task
         if self._login_error:
@@ -94,7 +83,6 @@ class ArmHubConfigFlow(ConfigFlow, domain=DOMAIN):
             password    = user_input[CONF_PASSWORD]
             addon_url   = user_input[CONF_ADDON_URL].rstrip("/")
             api_key     = _normalise_api_key(user_input[CONF_API_KEY])
-            imap_entity = user_input.get(CONF_IMAP_ENTITY, "").strip() or None
 
             if not hub_url:
                 errors[CONF_HUB_URL] = "invalid_url"
@@ -112,7 +100,6 @@ class ArmHubConfigFlow(ConfigFlow, domain=DOMAIN):
                 self._password    = password
                 self._addon_url   = addon_url
                 self._api_key     = api_key
-                self._imap_entity = imap_entity
 
                 return await self.async_step_login_progress()
 
@@ -123,7 +110,6 @@ class ArmHubConfigFlow(ConfigFlow, domain=DOMAIN):
                 vol.Required(CONF_PASSWORD):   str,
                 vol.Required(CONF_API_KEY,    default=self._api_key or ""): str,
                 vol.Required(CONF_ADDON_URL,  default=self._addon_url or DEFAULT_ADDON_URL): str,
-                vol.Optional(CONF_IMAP_ENTITY, default=self._imap_entity or imap_default or ""): str,
             }
         )
         return self.async_show_form(
@@ -203,15 +189,9 @@ class ArmHubConfigFlow(ConfigFlow, domain=DOMAIN):
                 elif token_data:
                     return self._create_entry(token_data)
 
-        imap_note = (
-            "IMAP integration detected — future codes will be submitted automatically."
-            if self._imap_entity
-            else "No IMAP integration detected. After setup, enter future codes via the MFA Code entity, or configure IMAP email forwarding."
-        )
         return self.async_show_form(
             step_id="mfa",
             data_schema=vol.Schema({vol.Required(_MFA_CODE): str}),
-            description_placeholders={"imap_note": imap_note},
             errors=errors,
         )
 
@@ -222,7 +202,6 @@ class ArmHubConfigFlow(ConfigFlow, domain=DOMAIN):
     ) -> ConfigFlowResult:
         entry = self._get_reconfigure_entry()
         errors: dict[str, str] = {}
-        imap_default = entry.data.get(CONF_IMAP_ENTITY) or _detect_imap_entity(self.hass)
 
         step_schema = vol.Schema(
             {
@@ -231,7 +210,6 @@ class ArmHubConfigFlow(ConfigFlow, domain=DOMAIN):
                 vol.Required(CONF_PASSWORD,   default=entry.data.get(CONF_PASSWORD, "")): str,
                 vol.Required(CONF_API_KEY,    default=entry.data.get(CONF_API_KEY, "")): str,
                 vol.Required(CONF_ADDON_URL,  default=entry.data.get(CONF_ADDON_URL, DEFAULT_ADDON_URL)): str,
-                vol.Optional(CONF_IMAP_ENTITY, default=imap_default or ""): str,
             }
         )
 
@@ -241,7 +219,6 @@ class ArmHubConfigFlow(ConfigFlow, domain=DOMAIN):
             password    = user_input[CONF_PASSWORD]
             addon_url   = user_input[CONF_ADDON_URL].rstrip("/")
             api_key     = _normalise_api_key(user_input[CONF_API_KEY])
-            imap_entity = user_input.get(CONF_IMAP_ENTITY, "").strip() or None
 
             if not hub_url:
                 errors[CONF_HUB_URL] = "invalid_url"
@@ -259,7 +236,6 @@ class ArmHubConfigFlow(ConfigFlow, domain=DOMAIN):
                         CONF_PASSWORD:    password,
                         CONF_ADDON_URL:   addon_url,
                         CONF_API_KEY:     api_key,
-                        CONF_IMAP_ENTITY: imap_entity,
                     },
                 )
 
@@ -285,7 +261,7 @@ class ArmHubConfigFlow(ConfigFlow, domain=DOMAIN):
             for attempt in range(6):  # up to ~30 s
                 async with session.post(
                     url,
-                    json={"email": self._email, "password": self._password, "imap_entity": self._imap_entity or ""},
+                    json={"email": self._email, "password": self._password},
                     timeout=aiohttp.ClientTimeout(total=10),
                 ) as resp:
                     data = await resp.json(content_type=None)
@@ -359,7 +335,6 @@ class ArmHubConfigFlow(ConfigFlow, domain=DOMAIN):
             CONF_PASSWORD:    self._password,
             CONF_ADDON_URL:   self._addon_url,
             CONF_API_KEY:     self._api_key,
-            CONF_IMAP_ENTITY: self._imap_entity,
         }
         if bootstrap_token:
             # Coordinator consumes this on first run to avoid triggering another login

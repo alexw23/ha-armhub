@@ -9,7 +9,6 @@
           "email": "Email address",
           "password": "Password",
           "addon_url": "Auth addon URL",
-          "imap_entity": "IMAP sensor entity ID (optional — for automatic MFA)",
           "api_key": "API key"
         }
       },
@@ -18,7 +17,7 @@
       },
       "mfa": {
         "title": "Verification Required",
-        "description": "A 6-digit code has been sent to the email address registered with your heat network portal. Enter it below.\n\n{imap_note}\n\n**Note:** ARM-Hub requires re-verification approximately every 24 hours. After setup, manage future codes via the **MFA Code** helper entity, or configure IMAP email forwarding for fully automatic handling.",
+        "description": "A 6-digit code has been sent to the email address registered with your heat network portal. Enter it below.\n\n**Note:** ARM-Hub asks for a new code about every 24 hours. To handle this automatically, choose an email code source in the Auth Addon's Configuration tab. Otherwise, enter future codes in the add-on's panel or the **MFA Code** entity.",
         "data": {
           "mfa_code": "6-digit verification code"
         }
@@ -31,7 +30,6 @@
           "email": "Email address",
           "password": "Password",
           "addon_url": "Auth addon URL",
-          "imap_entity": "IMAP sensor entity ID (optional — for automatic MFA)",
           "api_key": "API key"
         }
       }

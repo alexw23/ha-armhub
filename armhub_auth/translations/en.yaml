@@ -1,0 +1,13 @@
+configuration:
+  email_code_source:
+    name: Email code source
+    description: Where to read ARM-Hub's emailed code. Choose one; the other is ignored. Use manual to type it in yourself.
+  imap_entity:
+    name: IMAP sensor
+    description: Entity ID of the IMAP sensor, for example sensor.imap_home_example_com_messages. Only used with the imap source.
+  gmail_client_id:
+    name: Gmail client ID
+    description: Only used with the gmail source. See the Documentation tab.
+  gmail_client_secret:
+    name: Gmail client secret
+    description: Only used with the gmail source. See the Documentation tab.

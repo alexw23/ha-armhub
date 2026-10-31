@@ -2,14 +2,14 @@ name: "UK Heat Network (ARM-Hub) — Auth Addon"
 description: "Handles Azure AD B2C login and token refresh for the ARM-Hub HA integration."
 version: "2.2.1"
 slug: "armhubmeter"
+url: "https://github.com/alexw23/ha-armhub"
 init: false
 
 arch:
   - aarch64
   - amd64
-  - armhf
-  - armv7
-  - i386
+
+image: "ghcr.io/alexw23/ha-armhub-{arch}"
 
 map:
   - data
@@ -22,8 +22,12 @@ panel_icon: mdi:fire
 panel_title: "ARM-Hub Meter"
 
 options:
+  email_code_source: gmail
+  imap_entity: ""
   gmail_client_id: ""
   gmail_client_secret: ""
 schema:
+  email_code_source: list(gmail|imap|manual)
+  imap_entity: str?
   gmail_client_id: str?
   gmail_client_secret: password?
