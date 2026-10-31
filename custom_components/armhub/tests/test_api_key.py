@@ -20,7 +20,6 @@ FORM = {
     "password": "secret",
     "api_key": FAKE_KEY,
     "addon_url": "http://addon:8099",
-    "imap_entity": "",
 }
 
 

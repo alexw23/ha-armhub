@@ -9,7 +9,7 @@ There are two parts, and you need both:
 
 ## Install
 
-1. In the add-on store, add this repository and install **UK Heat Network (ARM-Hub) — Auth Addon**.
+1. In the add-on store, add this repository and install **UK Heat Network (ARM-Hub) — Auth Addon**. Its **Documentation** tab covers [what it does and how to set up the email code](armhub_auth/DOCS.md).
 2. In HACS, add this repository as a custom integration repository and download it.
 3. Restart Home Assistant, then add **UK Heat Network (ARM-Hub)** under **Settings → Devices & services**.
 
@@ -35,3 +35,11 @@ If the integration stops working after the portal changes its key, get the new o
 Tested with [Spot On Energy](https://spot-on-energy.arm-hub.com/)'s portal. Other heat networks on ARM-Hub may work but are untested, because requests currently identify themselves as coming from Spot On Energy's portal.
 
 This is an independent project, not affiliated with or endorsed by Spot On Energy, ARM-Hub, Armadillo Analytics or any heat network operator.
+
+## Development
+
+**Changes:** add them under `[Unreleased]` in `CHANGELOG.md`. Tests run on every pull request, along with a build of the add-on image.
+
+**Trying what's on `main`:** every push to `main` publishes a `dev` image. To test it, install **Auth Addon (dev)**, stop the normal add-on, and set the integration's add-on URL to `http://60356650-armhubmeter-dev:8099`. The dev add-on keeps its own data, so it logs in afresh.
+
+**Releasing:** publish a GitHub release tagged like `v2.3.0`. That builds the images, then sets the version in the add-on and integration and stamps the changelog on `main`. The add-on store only sees a new version once its image exists, which is why the bump comes last.

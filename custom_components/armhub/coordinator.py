@@ -29,7 +29,6 @@ from .const import (
     CONF_ADDON_URL,
     CONF_API_KEY,
     CONF_HUB_URL,
-    CONF_IMAP_ENTITY,
     DISCOVERY_INTERVAL_HOURS,
     DOMAIN,
     POLL_INTERVAL_MINUTES,
@@ -85,7 +84,6 @@ class ArmHubCoordinator(DataUpdateCoordinator[dict]):
         self._api_key: str    = config_entry.data[CONF_API_KEY]
         self._email:        str       = config_entry.data[CONF_EMAIL]
         self._password:     str       = config_entry.data[CONF_PASSWORD]
-        self._imap_entity:  str | None = config_entry.data.get(CONF_IMAP_ENTITY)
 
         self._mfa_pending: bool = False
 
@@ -206,7 +204,6 @@ class ArmHubCoordinator(DataUpdateCoordinator[dict]):
                 json={
                     "email":       self._email,
                     "password":    self._password,
-                    "imap_entity": self._imap_entity or "",
                 },
                 timeout=aiohttp.ClientTimeout(total=10),
             ) as resp:

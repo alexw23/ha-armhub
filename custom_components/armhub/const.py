@@ -5,7 +5,6 @@ DOMAIN = "armhub"
 CONF_HUB_URL     = "hub_url"
 CONF_PROPERTY_ID = "property_id"
 CONF_ADDON_URL   = "addon_url"
-CONF_IMAP_ENTITY = "imap_entity"
 CONF_API_KEY     = "api_key"
 
 DEFAULT_HUB_URL   = "spot-on-energy.arm-hub.com"

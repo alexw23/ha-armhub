@@ -6,11 +6,12 @@ Owns all authentication state:
   - Token stored encrypted at rest in /data/token.enc (key = sha256(password))
   - Silently refreshes access tokens before expiry
   - Proactively re-authenticates before the refresh token expires
-  - Manages the Gmail (OAuth) or IMAP watcher for auto MFA code submission
+  - Reads the emailed MFA code from Gmail or an IMAP sensor, whichever the add-on
+    is set to (email_code_source)
   - Every POST /token verifies credentials — unauthorized callers get 401
 
 JSON endpoints:
-  POST /token  Body: {email, password, imap_entity}
+  POST /token  Body: {email, password}
                → {status,access_token,expires_on} | {status:mfa_pending|logging_in|refreshing|error}
   GET  /mfa_status → {pending: bool}
   POST /mfa    Body: {code} or form-encoded
@@ -103,7 +104,6 @@ _creds_lock  = threading.Lock()
 _email:       str = ""
 _password:    str = ""
 _creds_hash:  str = ""  # sha256(email:password) — used for verification
-_imap_entity: str = ""
 
 _imap_thread: threading.Thread | None = None
 
@@ -155,13 +155,12 @@ def _load_token(password: str) -> bool:
 
 # ── Credential management ─────────────────────────────────────────────────────
 
-def _set_credentials(email: str, password: str, imap_entity: str) -> None:
-    global _email, _password, _creds_hash, _imap_entity
+def _set_credentials(email: str, password: str) -> None:
+    global _email, _password, _creds_hash
     with _creds_lock:
         _email        = email
         _password     = password
         _creds_hash   = hashlib.sha256(f"{email}:{password}".encode()).hexdigest()
-        _imap_entity  = imap_entity or _imap_entity
 
 
 def _verify_credentials(email: str, password: str) -> bool:
@@ -257,7 +256,7 @@ def _mfa_monitor() -> None:
     """Watch for mfa_pending and start the email watcher immediately — don't wait for coordinator."""
     while True:
         time.sleep(2)
-        if MFA_PENDING.exists() and (_gmail_connected() or _imap_entity):
+        if MFA_PENDING.exists() and _email_source_ready():
             if not _mfa_watcher_alive():
                 _log("MFA pending detected — auto-starting email watcher")
                 _start_mfa_watcher()
@@ -408,7 +407,7 @@ def _imap_watcher(entity_id: str) -> None:
 def _start_imap_watcher(entity_id: str) -> None:
     global _imap_thread
     if not entity_id:
-        _log("IMAP watcher: no imap_entity configured — auto-fetch disabled")
+        _log("IMAP watcher: no imap_entity set in the add-on's Configuration tab")
         return
     if not HA_TOKEN:
         _log("IMAP watcher: SUPERVISOR_TOKEN not set — auto-fetch disabled")
@@ -428,11 +427,31 @@ _gmail_pending: dict = {}  # state, verifier — for an in-progress consent
 _gmail_thread: threading.Thread | None = None
 
 
-def _gmail_client() -> tuple[str, str]:
+def _options() -> dict:
     try:
-        opts = json.loads(OPTIONS_FILE.read_text())
+        return json.loads(OPTIONS_FILE.read_text())
     except Exception:
-        opts = {}
+        return {}
+
+
+def _email_source() -> str:
+    """Return where to read the emailed MFA code: gmail, imap or manual."""
+    return _options().get("email_code_source") or "gmail"
+
+
+def _imap_entity() -> str:
+    return (_options().get("imap_entity") or "").strip()
+
+
+def _email_source_ready() -> bool:
+    source = _email_source()
+    if source == "gmail":
+        return _gmail_connected()
+    return source == "imap" and bool(_imap_entity())
+
+
+def _gmail_client() -> tuple[str, str]:
+    opts = _options()
     return (opts.get("gmail_client_id") or "").strip(), (opts.get("gmail_client_secret") or "").strip()
 
 
@@ -640,14 +659,16 @@ def _gmail_watcher() -> None:
 
 
 def _start_mfa_watcher() -> None:
-    """Start the Gmail watcher if Gmail is connected, otherwise the IMAP watcher."""
+    """Start the watcher for the chosen email source. It never falls back to the other."""
     global _gmail_thread
-    if _gmail_connected():
+    if not _email_source_ready():
+        return
+    if _email_source() == "gmail":
         if not (_gmail_thread and _gmail_thread.is_alive()):
             _gmail_thread = threading.Thread(target=_gmail_watcher, daemon=True)
             _gmail_thread.start()
-    elif _imap_entity:
-        _start_imap_watcher(_imap_entity)
+    else:
+        _start_imap_watcher(_imap_entity())
 
 
 def _mfa_watcher_alive() -> bool:
@@ -725,7 +746,7 @@ button{{font-size:1rem;padding:10px 24px;background:#e65100;color:#fff;
         border:none;border-radius:6px;cursor:pointer;margin-left:8px}}</style>
 </head><body>
   <h2>📱 MFA Code Required</h2>
-  <p>Enter the 6-digit SMS code sent to your phone:</p>
+  <p>Enter the 6-digit code sent to your ARM-Hub account’s email address:</p>
   <form method="POST" action="mfa">
     <input type="text" name="code" maxlength="6" pattern="\\d{{6}}"
            autofocus autocomplete="one-time-code" placeholder="000000">
@@ -779,8 +800,8 @@ class Handler(BaseHTTPRequestHandler):
             parts.append(f'<p class="ok">{html.escape(notice)}</p>')
         if not client_id or not client_secret:
             parts.append("<p>Set <b>gmail_client_id</b> and <b>gmail_client_secret</b> in the add-on's "
-                         "Configuration tab (Google Cloud OAuth client, type <i>Desktop app</i>), "
-                         "restart the add-on, then come back here.</p>")
+                         "Configuration tab (Google Cloud OAuth client, type <i>Web application</i>). See the Documentation tab, "
+                         "then restart the add-on and come back here.</p>")
         else:
             with _gmail_lock:
                 email = _gmail_tok.get("email")
@@ -790,12 +811,12 @@ class Handler(BaseHTTPRequestHandler):
                              "MFA codes will be read from this inbox automatically.</p>")
             parts.append(
                 "<ol><li>Click the button and approve read-only Gmail access.</li>"
-                "<li>Google will send you to a <code>localhost</code> page that fails to load — that's expected.</li>"
+                "<li>Google sends you to a <code>my.home-assistant.io</code> page. It doesn't need to do anything.</li>"
                 "<li>Copy the whole URL from the address bar and paste it below.</li></ol>"
                 f'<a class="btn" href="{html.escape(_gmail_auth_url())}" target="_blank" rel="noopener">'
                 f'{"Reconnect" if connected else "Sign in with Google"}</a>'
                 '<form method="POST" action="gmail" style="margin-top:16px">'
-                '<input type="text" name="redirect" placeholder="http://localhost/?state=…&amp;code=…" required>'
+                '<input type="text" name="redirect" placeholder="https://my.home-assistant.io/redirect/oauth?state=…&amp;code=…" required>'
                 '<button type="submit">Connect</button></form>'
             )
         self._send_html(200, HTML_GMAIL.format(body="\n  ".join(parts)))
@@ -837,7 +858,6 @@ class Handler(BaseHTTPRequestHandler):
 
         email    = payload.get("email", "").strip()
         password = payload.get("password", "").strip()
-        imap_ent = payload.get("imap_entity", "").strip()
 
         if not email or not password:
             self._send_json(400, {"error": "email and password required"})
@@ -854,10 +874,8 @@ class Handler(BaseHTTPRequestHandler):
             first_call = not _creds_hash
 
         if first_call:
-            _set_credentials(email, password, imap_ent)
+            _set_credentials(email, password)
             _load_token(password)
-        elif imap_ent and imap_ent != _imap_entity:
-            _set_credentials(email, password, imap_ent)
 
         _log(f"POST /token for {email}")
 
