@@ -3,9 +3,9 @@
     "step": {
       "user": {
         "title": "UK Heat Network (ARM-Hub)",
-        "description": "Enter your ARM-Hub portal credentials. Currently tested with ARM Hub (spoton.arm-hub.com). Other providers on arm-hub.com may work.\n\nThe auth addon must be installed and running before you continue.\n\n**Finding your API key:** log in to your heat network's portal in a browser (for example spot-on-energy.arm-hub.com), open the developer tools console, then paste this and press Enter:\n\n```\n{key_snippet}\n```\n\nIt prints a 32-character key, which only appears on your screen. If it says the key wasn't found, open the Network tab, reload the page, select a request to api.armadillo-analytics.com, and copy its `Ocp-Apim-Subscription-Key` header.",
+        "description": "Enter your ARM-Hub portal credentials. Currently tested with ARM Hub (spot-on-energy.arm-hub.com). Other providers on arm-hub.com may work.\n\nThe auth addon must be installed and running before you continue.\n\n**Finding your API key:** log in to your heat network's portal in a browser (for example spot-on-energy.arm-hub.com), open the developer tools console, then paste this and press Enter:\n\n```\n{key_snippet}\n```\n\nIt prints a 32-character key, which only appears on your screen. If it says the key wasn't found, open the Network tab, reload the page, select a request to api.armadillo-analytics.com, and copy its `Ocp-Apim-Subscription-Key` header.",
         "data": {
-          "hub_url": "Hub URL (e.g. spoton.arm-hub.com)",
+          "hub_url": "Hub URL (e.g. spot-on-energy.arm-hub.com)",
           "email": "Email address",
           "password": "Password",
           "addon_url": "Auth addon URL",
@@ -27,7 +27,7 @@
         "title": "Reconfigure UK Heat Network (ARM-Hub)",
         "description": "Update your ARM-Hub credentials or settings. Any MFA will be handled automatically by the integration after saving.\n\n**Finding your API key:** log in to your heat network's portal in a browser (for example spot-on-energy.arm-hub.com), open the developer tools console, then paste this and press Enter:\n\n```\n{key_snippet}\n```\n\nIt prints a 32-character key, which only appears on your screen. If it says the key wasn't found, open the Network tab, reload the page, select a request to api.armadillo-analytics.com, and copy its `Ocp-Apim-Subscription-Key` header.",
         "data": {
-          "hub_url": "Hub URL (e.g. spoton.arm-hub.com)",
+          "hub_url": "Hub URL (e.g. spot-on-energy.arm-hub.com)",
           "email": "Email address",
           "password": "Password",
           "addon_url": "Auth addon URL",

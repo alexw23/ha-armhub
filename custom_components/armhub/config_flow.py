@@ -33,8 +33,8 @@ KEY_SNIPPET = (
 def _normalise_hub_url(raw: str) -> str:
     """Extract bare hostname from any URL-like input.
 
-    Accepts 'spoton.arm-hub.com', 'https://spoton.arm-hub.com/dashboard', etc.
-    Returns 'spoton.arm-hub.com' or empty string on failure.
+    Accepts 'spot-on-energy.arm-hub.com', 'https://spot-on-energy.arm-hub.com/dashboard', etc.
+    Returns 'spot-on-energy.arm-hub.com' or empty string on failure.
     """
     raw = raw.strip()
     if not raw:
