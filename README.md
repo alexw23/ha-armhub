@@ -1,6 +1,6 @@
 # ARM-Hub for Home Assistant
 
-Brings UK heat network meters on ARM-Hub into Home Assistant: heat usage, costs and meter readings.
+Brings UK heat network meters on ARM-Hub, such as Spot On Energy's, into Home Assistant: heat usage, costs and meter readings.
 
 There are two parts, and you need both:
 
@@ -30,4 +30,8 @@ If it says the key wasn't found, open the **Network** tab, reload the page, sele
 
 If the integration stops working after the portal changes its key, get the new one the same way and enter it under **Reconfigure**.
 
-Tested with `spoton.arm-hub.com`. This isn't affiliated with ARM-Hub, Armadillo Analytics or any heat network operator.
+## Compatibility
+
+Tested with [Spot On Energy](https://spot-on-energy.arm-hub.com/)'s portal. Other heat networks on ARM-Hub may work but are untested, because requests currently identify themselves as coming from Spot On Energy's portal.
+
+This is an independent project, not affiliated with or endorsed by Spot On Energy, ARM-Hub, Armadillo Analytics or any heat network operator.
