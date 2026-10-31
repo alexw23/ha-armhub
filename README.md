@@ -42,4 +42,4 @@ This is an independent project, not affiliated with or endorsed by Spot On Energ
 
 **Trying what's on `main`:** every push to `main` publishes a `dev` image. To test it, install **Auth Addon (dev)**, stop the normal add-on, and set the integration's add-on URL to `http://60356650-armhubmeter-dev:8099`. The dev add-on keeps its own data, so it logs in afresh.
 
-**Releasing:** publish a GitHub release tagged like `v2.3.0`. That builds the images, then sets the version in the add-on and integration and stamps the changelog on `main`. The add-on store only sees a new version once its image exists, which is why the bump comes last.
+**Releasing:** publish a GitHub release tagged like `v2.3.0`. That builds the images, then opens a pull request that sets the version in the add-on and integration and stamps the changelog. Merge it to offer the update: the add-on store only sees a new version once `main` says so, which is why this comes after the images exist.

@@ -67,14 +67,16 @@ jobs:
           cache-from: type=gha,scope=${{ matrix.arch }}
           cache-to: type=gha,scope=${{ matrix.arch }},mode=max
 
-  # Last, because the add-on store offers a new version as soon as config.yaml
-  # says so, and the images for it have to exist by then.
+  # Last, because the add-on store offers a new version as soon as config.yaml on
+  # main says so, and the images for it have to exist by then. This opens a pull
+  # request because main is protected and GITHUB_TOKEN can't be given a bypass.
   bump-version:
     if: github.event_name == 'release'
     needs: images
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      pull-requests: write
     steps:
       - uses: actions/checkout@v4
         with:
@@ -91,12 +93,18 @@ jobs:
           # Home Assistant doesn't follow symlinks inside add-on folders.
           cp CHANGELOG.md armhub_auth/CHANGELOG.md
           cp CHANGELOG.md armhub_auth_dev/CHANGELOG.md
-      - name: Commit to main
+      - name: Open the pull request
         env:
           TAG: ${{ github.event.release.tag_name }}
+          GH_TOKEN: ${{ github.token }}
         run: |
+          BRANCH="release/$TAG"
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$BRANCH"
           git add armhub_auth custom_components/armhub/manifest.json CHANGELOG.md armhub_auth_dev
           git commit -m "Release $TAG: set version and stamp changelog"
-          git push origin HEAD:main
+          git push origin "$BRANCH"
+          gh pr create --base main --head "$BRANCH" \
+            --title "Release $TAG: set version and stamp changelog" \
+            --body "The images for $TAG are published. Merge this to offer the update in the add-on store."
